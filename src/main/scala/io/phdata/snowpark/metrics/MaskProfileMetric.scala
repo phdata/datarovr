@@ -23,7 +23,7 @@ class MaskProfileMetric extends UnivariateMetric {
 
       val result = df_string.groupBy(columnName).count()
 
-      val stringResult = result.withColumn("value", to_json(array_construct(col("*"))))
+      val stringResult = result.withColumn("value", to_json(object_construct(col("*"))))
         .select("value").collect().map(_.getString(0)).mkString(" ")
 
       MetricResult(metricRunID, "Mask Profile Column - " + columnName, stringResult)
