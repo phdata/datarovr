@@ -14,7 +14,7 @@ class TestMaskProfileMetric extends TestingSessionConfigBase {
     val maskProfileMetric = new MaskProfileMetric()
     val actual = maskProfileMetric.runMetric("test", "character", df)
 
-    val expected = MetricResult("test", "Mask Profile Column - character", "[\"XXX\",2]")
+    val expected = MetricResult("test", "Mask Profile Column - character", "{\"CHARACTER\":\"XXX\",\"COUNT\":2}")
 
     assertEquals(actual, expected)
   }
@@ -27,7 +27,7 @@ class TestMaskProfileMetric extends TestingSessionConfigBase {
     val maskProfileMetric = new MaskProfileMetric()
     val actual = maskProfileMetric.runMetric("test", "Number", df)
 
-    val expected = MetricResult("test", "Mask Profile Column - Number", "[\"NNN\",2]")
+    val expected = MetricResult("test", "Mask Profile Column - Number", "{\"COUNT\":2,\"NUMBER\":\"NNN\"}")
 
     assertEquals(actual, expected)
   }
@@ -40,7 +40,7 @@ class TestMaskProfileMetric extends TestingSessionConfigBase {
     val maskProfileMetric = new MaskProfileMetric()
     val actual = maskProfileMetric.runMetric("test", "phone", df)
 
-    val expected = MetricResult("test", "Mask Profile Column - phone", "[\"NNN-NNN-NNNN\",2] [\"XXXX-XXXX-XXXX\",1]")
+    val expected = MetricResult("test", "Mask Profile Column - phone", "{\"COUNT\":2,\"PHONE\":\"NNN-NNN-NNNN\"} {\"COUNT\":1,\"PHONE\":\"XXXX-XXXX-XXXX\"}")
 
     assertEquals(actual, expected)
   }
@@ -80,7 +80,7 @@ class TestMaskProfileMetric extends TestingSessionConfigBase {
     val maskProfileMetric = new MaskProfileMetric()
     val actual = maskProfileMetric.runMetric("test", "character", df)
 
-    val expected = MetricResult("test", "Mask Profile Column - character", "[\"XXX\",1]")
+    val expected = MetricResult("test", "Mask Profile Column - character", "{\"CHARACTER\":\"XXX\",\"COUNT\":1}")
 
     assertEquals(actual, expected)
   }
