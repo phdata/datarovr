@@ -3,8 +3,9 @@ package io.phdata.snowpark.metrics;
 import com.snowflake.snowpark.Session;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.scalatest.junit.JUnitSuite;
 
-public class TestingSessionConfigBase  {
+public class TestingSessionConfigBase extends JUnitSuite {
 
     public static Session session;
 
