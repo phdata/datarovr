@@ -1,6 +1,5 @@
 package io.phdata.snowpark.metrics
 
-import io.phdata.snowpark.metrics.MetricResult
 import org.junit.Assert._
 import org.junit.Test
 

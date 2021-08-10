@@ -2,6 +2,7 @@ package io.phdata.snowpark.metrics
 
 import com.snowflake.snowpark.DataFrame
 import com.snowflake.snowpark.functions._
+import io.phdata.snowpark.helpers.ReformatOutputHelper
 
 class MaskProfileMetric extends UnivariateMetric {
 
@@ -21,10 +22,9 @@ class MaskProfileMetric extends UnivariateMetric {
 
       val df_string = df_filtered.withColumn(columnName, maskUdf(df(columnName)))
 
-      val result = df_string.groupBy(columnName).count()
+      val df_result = df_string.groupBy(columnName).count()
 
-      val stringResult = result.withColumn("value", to_json(object_construct(col("*"))))
-        .select("value").collect().map(_.getString(0)).mkString(" ")
+      val stringResult = (new ReformatOutputHelper).convertDataframeToStringOutput(df_result)
 
       MetricResult(metricRunID, "Mask Profile Column - " + columnName, stringResult)
     }
