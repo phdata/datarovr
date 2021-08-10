@@ -5,7 +5,7 @@ import org.junit.Test
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
-class TestIntegerDescriptionProfileMetric extends TestingSessionConfigBase {
+class TestNumberDescriptionProfileMetric extends TestingSessionConfigBase {
 
   implicit val formats = DefaultFormats
 
@@ -13,10 +13,10 @@ class TestIntegerDescriptionProfileMetric extends TestingSessionConfigBase {
   def testStandardDeviation(): Unit = {
     val df = getSession.createDataFrame(Seq((5, "one"), (10, "two"))).toDF("Number", "character")
 
-    val integerTest = new IntegerDescriptionMetric()
+    val integerTest = new NumberDescriptionMetric()
     val actual = integerTest.runMetric("test", "Number", df)
 
-    val expected = MetricResult("test", "Integer Description Column - Number", "")
+    val expected = MetricResult("test", "Number Description Column - Number", "")
     val metric = 3.535533905932738e+00
 
     val map = parse(actual.jsonResults).extract[Map[String, Any]]
@@ -29,10 +29,10 @@ class TestIntegerDescriptionProfileMetric extends TestingSessionConfigBase {
   def testMean(): Unit = {
     val df = getSession.createDataFrame(Seq((5, "one"), (10, "two"))).toDF("Number", "character")
 
-    val integerTest = new IntegerDescriptionMetric()
+    val integerTest = new NumberDescriptionMetric()
     val actual = integerTest.runMetric("test", "Number", df)
 
-    val expected = MetricResult("test", "Integer Description Column - Number", "")
+    val expected = MetricResult("test", "Number Description Column - Number", "")
     val metric = 7.5
 
     val map = parse(actual.jsonResults).extract[Map[String, Any]]
@@ -45,10 +45,10 @@ class TestIntegerDescriptionProfileMetric extends TestingSessionConfigBase {
   def testMax(): Unit = {
     val df = getSession.createDataFrame(Seq((5, "one"), (10, "two"))).toDF("Number", "character")
 
-    val integerTest = new IntegerDescriptionMetric()
+    val integerTest = new NumberDescriptionMetric()
     val actual = integerTest.runMetric("test", "Number", df)
 
-    val expected = MetricResult("test", "Integer Description Column - Number", "")
+    val expected = MetricResult("test", "Number Description Column - Number", "")
     val metric = BigInt(10)
 
     val map = parse(actual.jsonResults).extract[Map[String, Any]]
@@ -61,10 +61,10 @@ class TestIntegerDescriptionProfileMetric extends TestingSessionConfigBase {
   def testMin(): Unit = {
     val df = getSession.createDataFrame(Seq(5, 10, 15, 20, 25)).toDF("Number")
 
-    val integerTest = new IntegerDescriptionMetric()
+    val integerTest = new NumberDescriptionMetric()
     val actual = integerTest.runMetric("test", "Number", df)
 
-    val expected = MetricResult("test", "Integer Description Column - Number", "")
+    val expected = MetricResult("test", "Number Description Column - Number", "")
     val metric = BigInt(5)
 
     val map = parse(actual.jsonResults).extract[Map[String, Any]]
@@ -77,10 +77,10 @@ class TestIntegerDescriptionProfileMetric extends TestingSessionConfigBase {
   def testKurtosis(): Unit = {
     val df = getSession.createDataFrame(Seq(5, 10, 15, 20, 25)).toDF("Number")
 
-    val integerTest = new IntegerDescriptionMetric()
+    val integerTest = new NumberDescriptionMetric()
     val actual = integerTest.runMetric("test", "Number", df)
 
-    val expected = MetricResult("test", "Integer Description Column - Number", "")
+    val expected = MetricResult("test", "Number Description Column - Number", "")
     val metric = -1.2
 
     val map = parse(actual.jsonResults).extract[Map[String, Any]]
@@ -93,10 +93,10 @@ class TestIntegerDescriptionProfileMetric extends TestingSessionConfigBase {
   def testSkew(): Unit = {
     val df = getSession.createDataFrame(Seq(5, 6, 15, 20, 25)).toDF("Number")
 
-    val integerTest = new IntegerDescriptionMetric()
+    val integerTest = new NumberDescriptionMetric()
     val actual = integerTest.runMetric("test", "Number", df)
 
-    val expected = MetricResult("test", "Integer Description Column - Number", "")
+    val expected = MetricResult("test", "Number Description Column - Number", "")
     val metric = 0.07925506585740152
 
     val map = parse(actual.jsonResults).extract[Map[String, Any]]
@@ -109,10 +109,10 @@ class TestIntegerDescriptionProfileMetric extends TestingSessionConfigBase {
   def testPercentiles(): Unit = {
     val df = getSession.createDataFrame(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)).toDF("Number")
 
-    val integerTest = new IntegerDescriptionMetric()
+    val integerTest = new NumberDescriptionMetric()
     val actual = integerTest.runMetric("test", "Number", df)
 
-    val expected = MetricResult("test", "Integer Description Column - Number", "")
+    val expected = MetricResult("test", "Number Description Column - Number", "")
 
     val map = parse(actual.jsonResults).extract[Map[String, Any]]
     assertEquals(expected.metricRunID, actual.metricRunID)
@@ -126,10 +126,10 @@ class TestIntegerDescriptionProfileMetric extends TestingSessionConfigBase {
   def testIQR(): Unit = {
     val df = getSession.createDataFrame(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)).toDF("Number")
 
-    val integerTest = new IntegerDescriptionMetric()
+    val integerTest = new NumberDescriptionMetric()
     val actual = integerTest.runMetric("test", "Number", df)
 
-    val expected = MetricResult("test", "Integer Description Column - Number", "")
+    val expected = MetricResult("test", "Number Description Column - Number", "")
 
     val map = parse(actual.jsonResults).extract[Map[String, Any]]
     assertEquals(expected.metricRunID, actual.metricRunID)
@@ -141,10 +141,10 @@ class TestIntegerDescriptionProfileMetric extends TestingSessionConfigBase {
   def testCV(): Unit = {
     val df = getSession.createDataFrame(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)).toDF("Number")
 
-    val integerTest = new IntegerDescriptionMetric()
+    val integerTest = new NumberDescriptionMetric()
     val actual = integerTest.runMetric("test", "Number", df)
 
-    val expected = MetricResult("test", "Integer Description Column - Number", "")
+    val expected = MetricResult("test", "Number Description Column - Number", "")
 
     val map = parse(actual.jsonResults).extract[Map[String, Any]]
     assertEquals(expected.metricRunID, actual.metricRunID)
@@ -156,10 +156,10 @@ class TestIntegerDescriptionProfileMetric extends TestingSessionConfigBase {
   def testSumCount(): Unit = {
     val df = getSession.createDataFrame(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)).toDF("Number")
 
-    val integerTest = new IntegerDescriptionMetric()
+    val integerTest = new NumberDescriptionMetric()
     val actual = integerTest.runMetric("test", "Number", df)
 
-    val expected = MetricResult("test", "Integer Description Column - Number", "")
+    val expected = MetricResult("test", "Number Description Column - Number", "")
 
     val map = parse(actual.jsonResults).extract[Map[String, Any]]
     assertEquals(expected.metricRunID, actual.metricRunID)
@@ -172,10 +172,10 @@ class TestIntegerDescriptionProfileMetric extends TestingSessionConfigBase {
   def testEntropy(): Unit = {
     val df = getSession.createDataFrame(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)).toDF("Number")
 
-    val integerTest = new IntegerDescriptionMetric()
+    val integerTest = new NumberDescriptionMetric()
     val actual = integerTest.runMetric("test", "Number", df)
 
-    val expected = MetricResult("test", "Integer Description Column - Number", "")
+    val expected = MetricResult("test", "Number Description Column - Number", "")
 
     val map = parse(actual.jsonResults).extract[Map[String, Any]]
     assertEquals(expected.metricRunID, actual.metricRunID)

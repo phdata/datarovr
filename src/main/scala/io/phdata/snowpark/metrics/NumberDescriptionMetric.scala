@@ -1,9 +1,11 @@
 package io.phdata.snowpark.metrics
 import com.snowflake.snowpark.DataFrame
 import com.snowflake.snowpark.functions._
+import com.snowflake.snowpark.types.DataTypes
 import io.phdata.snowpark.algorithms.ShannonEntropy
+import io.phdata.snowpark.helpers.ReformatOutputHelper
 
-class IntegerDescriptionMetric extends UnivariateMetric {
+class NumberDescriptionMetric extends UnivariateMetric {
 
    def runMetric(metricRunID: String, columnName: String, df: DataFrame): MetricResult = {
 
@@ -14,7 +16,8 @@ class IntegerDescriptionMetric extends UnivariateMetric {
       val df_result = df_clean.agg(stddev(col(columnName)).alias("stddev"),
         mean(col(columnName)).alias("mean"), max(col(columnName)).as("max"),
         min(col(columnName)).as("min"), variance(col(columnName)).as("variance"),
-        kurtosis(col(columnName)).as("kurtosis"), skew(col(columnName)).as("skewness"),
+        kurtosis(col(columnName).cast(DataTypes.DoubleType)).as("kurtosis"),
+        skew(col(columnName)).as("skewness"),
         approx_percentile(col(columnName), 0.25).as("percentile25"),
         approx_percentile(col(columnName), 0.5).as("percentile50"),
         approx_percentile(col(columnName), 0.75).as("percentile75"),
@@ -29,13 +32,12 @@ class IntegerDescriptionMetric extends UnivariateMetric {
         }
       )
 
-      val stringResult = df_result.withColumn("value", to_json(object_construct(col("*"))))
-        .select("value").collect().map(_.getString(0)).mkString(" ")
+      val stringResult = (new ReformatOutputHelper).convertDataframeToStringOutput(df_result)
 
-      MetricResult(metricRunID, "Integer Description Column - " + columnName, stringResult)
+      MetricResult(metricRunID, "Number Description Column - " + columnName, stringResult)
 
     }else {
-      MetricResult(metricRunID, "Integer Description Column - " + columnName, "Empty Table Or Null Column")
+      MetricResult(metricRunID, "Number Description Column - " + columnName, "Empty Table Or Null Column")
     }
   }
 

@@ -15,9 +15,13 @@ object Main {
     try {
       val properties = (new YamlPropertiesHelper).returnProperties("src/main/scala/io/phdata/snowpark/resources/application_properties.yaml")
       val schema = properties.getOrElse("Schema", "").asInstanceOf[String]
-      val univariateMetricTests = generateUnivariateTests(properties.getOrElse("Univariate-Tests", "").asInstanceOf[String].split(",").toSeq)
+      val univariateMetricTests = generateUnivariateTest(properties.getOrElse("Univariate-Tests", "").asInstanceOf[String].split(",").toSeq)
 
       val univariateResults = runUnivariateTests(session, schema, univariateMetricTests)
+
+      val multivariateMetricTests = generateMultivariateTest(properties.getOrElse("Multivariate-Tests", "").asInstanceOf[String].split(",").toSeq)
+
+      val multivariateResults = runMultivariateTests(session, schema, multivariateMetricTests)
 
       val resultSchema = StructType(
         StructField("metricRunID", StringType, nullable = true) ::
@@ -25,7 +29,10 @@ object Main {
           StructField("jsonResults", StringType, nullable = true) ::
           Nil)
 
-      val dfResults = session.createDataFrame(univariateResults, resultSchema)
+      val dfResultsUnivariate = session.createDataFrame(univariateResults, resultSchema)
+      val dfResultsMultivariate = session.createDataFrame(multivariateResults, resultSchema)
+
+      val dfResults = dfResultsUnivariate.unionAll(dfResultsMultivariate)
 
       dfResults.write.mode(SaveMode.Overwrite).saveAsTable(properties.getOrElse("Metric-Table", "").asInstanceOf[String])
 
@@ -33,6 +40,35 @@ object Main {
     finally {
       session.close()
     }
+  }
+
+  /***
+   * Will run all of the multiivariate tests against all of the columns in all of the tables on the schema.
+   * @param session active session to snowflake.
+   * @param schema Schema to get all tables from.
+   * @param multivariateMetricTests Tests to run against the columns
+   * @return
+   */
+  def runMultivariateTests(session: Session, schema: String, multivariateMetricTests: Seq[MultivariateMetric]): Seq[Row] = {
+    val dfTables = session.table("INFORMATION_SCHEMA.TABLES")
+      .filter(col("TABLE_SCHEMA") === schema && col("TABLE_TYPE") === "BASE TABLE")
+      .select(col("TABLE_NAME"))
+
+    val tables = dfTables.collect().map(_.getString(0))
+
+    tables.flatMap(table => {
+
+      val columns = session.table("INFORMATION_SCHEMA.COLUMNS")
+        .filter(col("TABLE_SCHEMA") === schema && col("TABLE_NAME") === table)
+        .select(col("COLUMN_NAME")).collect().map(_.getString(0))
+
+      val tableData = session.table(table)
+
+        multivariateMetricTests.map(test => {
+          val testResultRaw = test.runMetric("test", columns.toList, tableData, table)
+          Row(testResultRaw.metricRunID, testResultRaw.metricName, testResultRaw.jsonResults)
+        })
+    }).toSeq
   }
 
   /***
@@ -45,7 +81,7 @@ object Main {
   def runUnivariateTests(session: Session, schema: String, univariateMetricTests: Seq[UnivariateMetric]): Seq[Row] = {
     val dfTables = session.table("INFORMATION_SCHEMA.TABLES")
       .filter(col("TABLE_SCHEMA") === schema && col("TABLE_TYPE") === "BASE TABLE")
-      .select(col("TABLE_NAME")).limit(2)
+      .select(col("TABLE_NAME"))
 
     val tables = dfTables.collect().map(_.getString(0))
 
@@ -67,13 +103,24 @@ object Main {
   }
 
   /***
-   * Will get the univariate metrics based on the string class passed in.
+   * Will get the metrics tests based on the string class passed in.
    * @param tests
    * @return
    */
-  def generateUnivariateTests(tests: Seq[String]): Seq[UnivariateMetric] = {
+  def generateUnivariateTest(tests: Seq[String]): Seq[UnivariateMetric] = {
     tests.toArray.map(x => {
       Class.forName("io.phdata.snowpark.metrics." + x).getDeclaredConstructor().newInstance().asInstanceOf[UnivariateMetric]
+    }).toSeq
+  }
+
+  /***
+   * Will get the metrics tests based on the string class passed in.
+   * @param tests
+   * @return
+   */
+  def generateMultivariateTest(tests: Seq[String]): Seq[MultivariateMetric] = {
+    tests.toArray.map(x => {
+      Class.forName("io.phdata.snowpark.metrics." + x).getDeclaredConstructor().newInstance().asInstanceOf[MultivariateMetric]
     }).toSeq
   }
 
