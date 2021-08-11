@@ -3,23 +3,23 @@ package io.phdata.snowpark
 import com.snowflake.snowpark.functions.col
 import com.snowflake.snowpark.types.{StringType, StructField, StructType}
 import com.snowflake.snowpark.{Row, SaveMode, Session}
-import io.phdata.snowpark.helpers.YamlPropertiesHelper
+import io.phdata.snowpark.helpers.EnvPropertyHelper
 import io.phdata.snowpark.metrics._
 
 object Main {
 
   def main(args: Array[String]) {
 
-    val session = Session.builder.configFile("src/main/scala/io/phdata/snowpark/resources/snowflake_config.conf").create
+    val session = Session.builder.configs((new EnvPropertyHelper).getSnowflakeConnectionProperties()).create
 
     try {
-      val properties = (new YamlPropertiesHelper).returnProperties("src/main/scala/io/phdata/snowpark/resources/application_properties.yaml")
-      val schema = properties.getOrElse("Schema", "").asInstanceOf[String]
-      val univariateMetricTests = generateUnivariateTest(properties.getOrElse("Univariate-Tests", "").asInstanceOf[String].split(",").toSeq)
+      val properties = (new EnvPropertyHelper).getApplicationProperties
+      val schema = properties.getOrElse("SCHEMA", "")
+      val univariateMetricTests = generateUnivariateTest(properties.getOrElse("UNIVARIATE_TESTS", "").split(",").toSeq)
 
       val univariateResults = runUnivariateTests(session, schema, univariateMetricTests)
 
-      val multivariateMetricTests = generateMultivariateTest(properties.getOrElse("Multivariate-Tests", "").asInstanceOf[String].split(",").toSeq)
+      val multivariateMetricTests = generateMultivariateTest(properties.getOrElse("MULTIVARIATE_TESTS", "").asInstanceOf[String].split(",").toSeq)
 
       val multivariateResults = runMultivariateTests(session, schema, multivariateMetricTests)
 
@@ -34,7 +34,7 @@ object Main {
 
       val dfResults = dfResultsUnivariate.unionAll(dfResultsMultivariate)
 
-      dfResults.write.mode(SaveMode.Overwrite).saveAsTable(properties.getOrElse("Metric-Table", "").asInstanceOf[String])
+      dfResults.write.mode(SaveMode.Overwrite).saveAsTable(properties.getOrElse("METRIC_TABLE", "").asInstanceOf[String])
 
     }
     finally {
@@ -52,7 +52,7 @@ object Main {
   def runMultivariateTests(session: Session, schema: String, multivariateMetricTests: Seq[MultivariateMetric]): Seq[Row] = {
     val dfTables = session.table("INFORMATION_SCHEMA.TABLES")
       .filter(col("TABLE_SCHEMA") === schema && col("TABLE_TYPE") === "BASE TABLE")
-      .select(col("TABLE_NAME"))
+      .select(col("TABLE_NAME")).limit(2)
 
     val tables = dfTables.collect().map(_.getString(0))
 
@@ -81,7 +81,7 @@ object Main {
   def runUnivariateTests(session: Session, schema: String, univariateMetricTests: Seq[UnivariateMetric]): Seq[Row] = {
     val dfTables = session.table("INFORMATION_SCHEMA.TABLES")
       .filter(col("TABLE_SCHEMA") === schema && col("TABLE_TYPE") === "BASE TABLE")
-      .select(col("TABLE_NAME"))
+      .select(col("TABLE_NAME")).limit(1)
 
     val tables = dfTables.collect().map(_.getString(0))
 

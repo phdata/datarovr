@@ -1,6 +1,7 @@
 package io.phdata.snowpark.metrics;
 
 import com.snowflake.snowpark.Session;
+import io.phdata.snowpark.helpers.EnvPropertyHelper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -13,7 +14,7 @@ public class SessionConfigBase extends JUnitSuite {
 
     @BeforeClass
     public static void setupClass() {
-        session = Session.builder().configFile("src/test/scala/io/phdata/snowpark/resources/snowflake_config.conf").create();
+        session = Session.builder().configs((new EnvPropertyHelper()).getSnowflakeConnectionProperties()).create();
     }
 
     @AfterClass
