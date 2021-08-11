@@ -2,7 +2,9 @@ package io.phdata.snowpark.metrics;
 
 import com.snowflake.snowpark.Session;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.scalatest.junit.JUnitSuite;
 
 public class SessionConfigBase extends JUnitSuite {
@@ -20,6 +22,10 @@ public class SessionConfigBase extends JUnitSuite {
             session.close();
         }
     }
+
+    @Test
+    public void dummy() { Assert.assertTrue(true);}
+
 
     protected Session getSession() { return session; }
 }
