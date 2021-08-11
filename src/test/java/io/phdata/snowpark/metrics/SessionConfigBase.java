@@ -5,7 +5,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.scalatest.junit.JUnitSuite;
 
-public class TestingSessionConfigBase extends JUnitSuite {
+public class SessionConfigBase extends JUnitSuite {
 
     public static Session session;
 

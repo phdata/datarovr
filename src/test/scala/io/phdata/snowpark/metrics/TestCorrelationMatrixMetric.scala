@@ -3,7 +3,7 @@ package io.phdata.snowpark.metrics
 import org.junit.Assert._
 import org.junit.Test
 
-class TestCorrelationMatrixMetric extends TestingSessionConfigBase {
+class TestCorrelationMatrixMetric extends SessionConfigBase {
 
   @Test
   def testThreeColumnCorrelation(): Unit = {

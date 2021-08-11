@@ -3,7 +3,7 @@ package io.phdata.snowpark.metrics
 import org.junit.Assert._
 import org.junit.Test
 
-class TestMaskProfileMetric extends TestingSessionConfigBase {
+class TestMaskProfileMetric extends SessionConfigBase {
 
   @Test
   def testCharacterReplacement(): Unit = {

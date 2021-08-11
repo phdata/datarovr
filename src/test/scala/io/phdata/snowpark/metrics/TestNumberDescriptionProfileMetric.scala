@@ -5,7 +5,7 @@ import org.junit.Test
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
-class TestNumberDescriptionProfileMetric extends TestingSessionConfigBase {
+class TestNumberDescriptionProfileMetric extends SessionConfigBase {
 
   implicit val formats = DefaultFormats
 
