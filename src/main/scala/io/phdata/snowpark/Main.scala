@@ -19,7 +19,7 @@ object Main {
 
       val univariateResults = runUnivariateTests(session, schema, univariateMetricTests)
 
-      val multivariateMetricTests = generateMultivariateTest(properties.getOrElse("MULTIVARIATE_TESTS", "").asInstanceOf[String].split(",").toSeq)
+      val multivariateMetricTests = generateMultivariateTest(properties.getOrElse("MULTIVARIATE_TESTS", "").split(",").toSeq)
 
       val multivariateResults = runMultivariateTests(session, schema, multivariateMetricTests)
 
