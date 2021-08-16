@@ -48,3 +48,5 @@ Thumbs.db
 *.mov
 *.wmv
 
+# IML files from intellij
+**/*.iml
