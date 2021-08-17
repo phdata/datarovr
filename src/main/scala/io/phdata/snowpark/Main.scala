@@ -2,7 +2,7 @@ package io.phdata.snowpark
 
 import com.snowflake.snowpark.functions.col
 import com.snowflake.snowpark.types.{StringType, StructField, StructType}
-import com.snowflake.snowpark.{Row, SaveMode, Session}
+import com.snowflake.snowpark.{DataFrame, Row, SaveMode, Session}
 import io.phdata.snowpark.helpers.EnvPropertyHelper
 import io.phdata.snowpark.metrics._
 
@@ -34,12 +34,25 @@ object Main {
 
       val dfResults = dfResultsUnivariate.unionAll(dfResultsMultivariate)
 
-      dfResults.write.mode(SaveMode.Overwrite).saveAsTable(properties.getOrElse("METRIC_TABLE", "").asInstanceOf[String])
-
+      val metricsTable = properties.getOrElse("METRIC_TABLE", "")
+      if(  metricsTable != "") {
+        saveMetricsToSnowflake(metricsTable, dfResults)
+      } else {
+        dfResults.collect().foreach(println)
+      }
     }
     finally {
       session.close()
     }
+  }
+
+  /***
+   * Saves the generated metrics to the provided metrics table in Snowflake
+   * @param tableName name of the table to save the metrics in
+   * @param df dataframe of generated metrics
+   */
+  def saveMetricsToSnowflake(tableName: String, df: DataFrame): Unit = {
+    df.write.mode(SaveMode.Overwrite).saveAsTable(tableName)
   }
 
   /***
