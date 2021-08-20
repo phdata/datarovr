@@ -3,23 +3,25 @@ package io.phdata.snowpark
 import com.snowflake.snowpark.functions.col
 import com.snowflake.snowpark.types.{StringType, StructField, StructType}
 import com.snowflake.snowpark.{DataFrame, Row, SaveMode, Session}
-import io.phdata.snowpark.helpers.EnvPropertyHelper
+import io.phdata.snowpark.helpers.ConfigBuilder
 import io.phdata.snowpark.metrics._
 
 object Main {
 
   def main(args: Array[String]) {
+    implicit val config = ConfigBuilder.build(args)
 
-    val session = Session.builder.configs((new EnvPropertyHelper).getSnowflakeConnectionProperties()).create
+    //TODO: validate required config params exist
+
+    val session = Session.builder.configs(config.getSnowflakeConnectionProperties).create
 
     try {
-      val properties = (new EnvPropertyHelper).getApplicationProperties
-      val schema = properties.getOrElse("SCHEMA", "")
-      val univariateMetricTests = generateUnivariateTest(properties.getOrElse("UNIVARIATE_TESTS", "").split(",").toSeq)
+      val schema = config.schema.getOrElse("")
+      val univariateMetricTests = generateUnivariateTest(config.univariate_tests)
 
       val univariateResults = runUnivariateTests(session, schema, univariateMetricTests)
 
-      val multivariateMetricTests = generateMultivariateTest(properties.getOrElse("MULTIVARIATE_TESTS", "").split(",").toSeq)
+      val multivariateMetricTests = generateMultivariateTest(config.multivariate_tests)
 
       val multivariateResults = runMultivariateTests(session, schema, multivariateMetricTests)
 
@@ -34,7 +36,7 @@ object Main {
 
       val dfResults = dfResultsUnivariate.unionAll(dfResultsMultivariate)
 
-      val metricsTable = properties.getOrElse("METRIC_TABLE", "")
+      val metricsTable = config.metric_table.getOrElse("")
       if(  metricsTable != "") {
         saveMetricsToSnowflake(metricsTable, dfResults)
       } else {

@@ -50,3 +50,9 @@ Thumbs.db
 
 # IML files from intellij
 **/*.iml
+
+#environment file for testing
+env.sh
+
+#dependency reduced pom
+dependency-reduced-pom.xml

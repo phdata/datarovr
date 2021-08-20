@@ -41,10 +41,23 @@
       <artifactId>snowpark</artifactId>
       <version>${snowpark.version}</version>
     </dependency>
+
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
       <version>${snakeyaml.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.scopt</groupId>
+      <artifactId>scopt_2.12</artifactId>
+      <version>4.0.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.typesafe</groupId>
+      <artifactId>config</artifactId>
+      <version>1.4.1</version>
     </dependency>
 
     <!-- Test -->
@@ -63,6 +76,11 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>${project.basedir}/src/main/resources/</directory>
+      </resource>
+    </resources>
 
     <plugins>
       <plugin>
@@ -90,6 +108,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven.surefire.plugin.version}</version>
         <configuration>
+          <skipTests>true</skipTests>
           <forkCount>2.0C</forkCount>
           <reuseForks>false</reuseForks>
         </configuration>
@@ -98,6 +117,9 @@
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
         <version>${scalatest.maven.plugin.version}</version>
+        <configuration>
+          <parallel>false</parallel>
+        </configuration>
         <executions>
           <execution>
             <id>test</id>
@@ -106,6 +128,37 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>io.phdata.snowpark.Main</mainClass>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <filters>
+            <filter>
+              <artifact>*:*</artifact>
+              <excludes>
+                <exclude>META-INF/*.SF</exclude>
+                <exclude>META-INF/*.DSA</exclude>
+                <exclude>META-INF/*.RSA</exclude>
+              </excludes>
+            </filter>
+          </filters>
+        </configuration>
       </plugin>
     </plugins>
   </build>
