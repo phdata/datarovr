@@ -13,7 +13,7 @@ object Main {
 
     //TODO: validate required config params exist
 
-    val session = Session.builder.configs(config.getSnowflakeConnectionProperties).create
+    val session = Session.builder.configs(config.getSnowparkConnectionProperties).create
 
     try {
       val schema = config.schema.getOrElse("")

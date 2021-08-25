@@ -17,7 +17,7 @@ public class SessionConfigBase extends JUnitSuite {
     @BeforeClass
     public static void setupClass() {
         config = ConfigBuilder$.MODULE$.build((new String[]{}));
-        session = Session.builder().configs(config.getSnowflakeConnectionProperties()).create();
+        session = Session.builder().configs(config.getSnowparkConnectionProperties()).create();
     }
 
     @AfterClass

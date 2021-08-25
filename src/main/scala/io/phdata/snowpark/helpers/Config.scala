@@ -70,7 +70,7 @@ case class Config(
    * Creates a Map[String,String] that can be passed directly to snowpark's session builder
    * @return a config map for snowpark's session builder
    */
-  def getSnowflakeConnectionProperties: Map[String, String] = {
+  def getSnowparkConnectionProperties: Map[String, String] = {
     val mconf = runtimeMirror(getClass.getClassLoader).reflect(this)
 
     Config.fields.map(_.name.toString.trim).filter(_.startsWith("snowflake_")).flatMap(n => {
