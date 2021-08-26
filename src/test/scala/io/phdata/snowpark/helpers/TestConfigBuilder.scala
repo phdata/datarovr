@@ -14,13 +14,30 @@ class TestConfigBuilder extends JUnitSuite with PrivateMethodTester {
 
     val expected = Config(
       snowflake_url = Some("url"),
-      univariate_tests = Array[String]("one", "two", "three"),
+      metrics = Array[String]("one", "two", "three"),
     )
 
 
     val m = Map[String, String](
       "snowflake_url" -> "url",
-      "univariate_tests" -> "one,two,three",
+      "metrics" -> "one,two,three",
+    )
+
+    val actual = ConfigBuilder.invokePrivate(fromMap(m))
+
+    assertEquals(expected, actual)
+  }
+
+  @Test
+  def TestFromMapEmptyMetrics(): Unit = {
+    val fromMap = PrivateMethod[Config]('fromMap)
+
+    val expected = Config(
+      metrics = Seq.empty[String],
+    )
+
+    val m = Map[String, String](
+      "metrics" -> "",
     )
 
     val actual = ConfigBuilder.invokePrivate(fromMap(m))
@@ -34,7 +51,7 @@ class TestConfigBuilder extends JUnitSuite with PrivateMethodTester {
 
     val expected = Config(
       snowflake_url = Some("url"),
-      univariate_tests = Array[String]("one", "two", "three"),
+      metrics = Array[String]("one", "two", "three"),
     )
 
     val actual = ConfigBuilder.invokePrivate(fromJConfig(ConfigFactory.parseResources("test.conf")))
@@ -48,10 +65,10 @@ class TestConfigBuilder extends JUnitSuite with PrivateMethodTester {
 
     val expected = Config(
       snowflake_url = Some("url"),
-      univariate_tests = Array[String]("one", "two", "three"),
+      metrics = Array[String]("one", "two", "three"),
     )
 
-    val args = Array[String]("--snowflake_url", "url", "--univariate_tests", "one,two,three")
+    val args = Array[String]("--snowflake_url", "url", "--metrics", "one,two,three")
 
     val actual = ConfigBuilder.invokePrivate(buildArgs(args))
 
@@ -67,19 +84,17 @@ class TestConfigBuilder extends JUnitSuite with PrivateMethodTester {
       snowflake_db = Some("two"),
       snowflake_schema = Some("three"),
       snowflake_warehouse = Some("four"),
-      univariate_tests = Seq("two-one", "two-two", "two-three"),
-      multivariate_tests = Seq("three-one", "three-two", "three-three"),
+      metrics = Seq("two-one", "two-two", "two-three"),
     )
 
     val confs = Seq(
       Config(snowflake_url = Some("one")),
       Config(
         snowflake_db = Some("two"),
-        univariate_tests = Seq("two-one", "two-two", "two-three"),
+        metrics = Seq("two-one", "two-two", "two-three"),
       ),
       Config(
         snowflake_schema = Some("three"),
-        multivariate_tests = Seq("three-one", "three-two", "three-three"),
       ),
       Config(snowflake_warehouse = Some("four")),
     )
@@ -95,18 +110,18 @@ class TestConfigBuilder extends JUnitSuite with PrivateMethodTester {
 
     val expected = Config(
       snowflake_url = Some("url"),
-      univariate_tests = Seq("one", "two", "three"),
+      metrics = Seq("one", "two", "three"),
     )
 
     val confs = Seq(
       Config(snowflake_url = Some("url")),
       Config(
         snowflake_url = Some("foo"),
-        univariate_tests = Seq("one", "two", "three")
+        metrics = Seq("one", "two", "three")
       ),
       Config(
         snowflake_url = Some("bar"),
-        univariate_tests = Seq("foo", "bar", "baz"),
+        metrics = Seq("foo", "bar", "baz"),
       ),
       Config(snowflake_url = Some("baz")),
     )

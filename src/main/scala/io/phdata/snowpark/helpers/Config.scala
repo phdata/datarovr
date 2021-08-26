@@ -10,21 +10,20 @@ import scala.reflect.runtime.universe._
  * Every attribute that you create _must_ have a corresponding "describe_" method which is used in the CLI
  * "--help" parameter.
  *
- * @param snowflake_url
- * @param snowflake_db
- * @param snowflake_schema
- * @param snowflake_warehouse
- * @param snowflake_role
- * @param snowflake_user
- * @param snowflake_password
- * @param snowflake_private_key_file
- * @param snowflake_private_key_file_pwd
- * @param snowflake_private_key
- * @param config_file
- * @param schema
- * @param metric_table
- * @param univariate_tests
- * @param multivariate_tests
+ * @param snowflake_url snowflake account url
+ * @param snowflake_db snowflake connection database
+ * @param snowflake_schema snowflake connection schema
+ * @param snowflake_warehouse snowflake connection warehouse
+ * @param snowflake_role snowflake connection role
+ * @param snowflake_user snowflake connection user
+ * @param snowflake_password snowflake connection password
+ * @param snowflake_private_key_file snowflake connection private key file
+ * @param snowflake_private_key_file_pwd snowflake connection private key file password
+ * @param snowflake_privatekey snowflake connection private key
+ * @param config_file path to configuration file
+ * @param tables dot separated glob patterns to match _database_._schema_._tables_
+ * @param metric_table_prefix string to prefix metrics tables
+ * @param metrics seq of metrics to execute
  */
 case class Config(
   snowflake_url: Option[String] = None ,
@@ -41,12 +40,18 @@ case class Config(
   snowflake_privatekey: Option[String] = None,
 
   config_file: Option[String] = None,
-  schema: Option[String] = None,
-  metric_table: Option[String] = None,
-  univariate_tests: Seq[String] = Seq[String](),
-  multivariate_tests: Seq[String] = Seq[String](),
+  tables: Option[String] = None,
+  metric_table_prefix: Option[String] = None,
+  metric_dump_table: Option[String] = None,
+  metric_csv_directory: Option[String] = None,
+  metrics: Seq[String] = Seq[String](),
+  log_level: Option[String] = None,
 ) {
 
+  /**
+   * These functions are required for every attribute to generate the --help screen
+   * If you don't want an attribute accessible by the CLI params, return None
+   */
   def describe_snowflake_url: Option[String] = Some("The url to your snowflake account")
   def describe_snowflake_db: Option[String] = Some("Snowflake database to connect to")
   def describe_snowflake_schema: Option[String] = Some("Snowflake schema to connect to")
@@ -61,10 +66,12 @@ case class Config(
   def describe_snowflake_privatekey: Option[String] = None
 
   def describe_config_file: Option[String] = Some("Path to configuration file")
-  def describe_schema: Option[String] = Some("Schema to get tables from")
-  def describe_metric_table: Option[String] = Some("Table to store metrics into")
-  def describe_univariate_tests: Option[String] = Some("Comma separated list of univariate tests to run")
-  def describe_multivariate_tests: Option[String] = Some("Comma separated list of multivariate tests to run")
+  def describe_tables: Option[String] = Some("Glob matching table names you'd like to profile")
+  def describe_metric_table_prefix: Option[String] = Some("Set this prefix to store test results back to snowflake")
+  def describe_metric_dump_table: Option[String] = Some("Set this table name to dump unified metric records to a single table")
+  def describe_metric_csv_directory: Option[String] = Some("Set this to the directory name to create CSV files in")
+  def describe_metrics: Option[String] = Some("Comma separated list of metrics to run")
+  def describe_log_level: Option[String] = Some("Set log level")
 
   /**
    * Creates a Map[String,String] that can be passed directly to snowpark's session builder

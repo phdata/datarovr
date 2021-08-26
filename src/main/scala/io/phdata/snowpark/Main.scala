@@ -1,143 +1,96 @@
 package io.phdata.snowpark
 
-import com.snowflake.snowpark.functions.col
-import com.snowflake.snowpark.types.{StringType, StructField, StructType}
-import com.snowflake.snowpark.{DataFrame, Row, SaveMode, Session}
-import io.phdata.snowpark.helpers.ConfigBuilder
-import io.phdata.snowpark.metrics._
+import com.snowflake.snowpark.Session
+import io.phdata.snowpark.helpers.{Config, ConfigBuilder, TableName}
+import io.phdata.snowpark.helpers.functions._
+import org.apache.log4j.{Level, Logger}
+
+import java.io.{BufferedWriter, File, FileWriter}
 
 object Main {
 
   def main(args: Array[String]) {
-    implicit val config = ConfigBuilder.build(args)
+    println("retrieving configuration")
+    implicit val config: Config = ConfigBuilder.build(args)
+
+    /**
+     * Set logging level
+     */
+    config.log_level match {
+      case Some(ll) =>
+        val logger = Logger.getLogger("com.snowflake.snowpark")
+        logger.setLevel(Level.toLevel(ll))
+      case None => ;
+    }
 
     //TODO: validate required config params exist
 
-    val session = Session.builder.configs(config.getSnowparkConnectionProperties).create
+    println("creating session")
+    implicit val session: Session = Session.builder.configs(config.getSnowparkConnectionProperties).create
 
-    try {
-      val schema = config.schema.getOrElse("")
-      val univariateMetricTests = generateUnivariateTest(config.univariate_tests)
+    println("finding matching tables")
+    val tables = getMatchingTables()
+    if (tables.size <= 0) {
+      println("No matching tables found! Quitting!")
+      sys.exit(1)
+    }
 
-      val univariateResults = runUnivariateTests(session, schema, univariateMetricTests)
+    val metrics = config.metrics.map(companionFromString).flatMap(ob => {
+      val results = tables.flatMap(t => {
+        val df = session.table(t.asMultipartName)
 
-      val multivariateMetricTests = generateMultivariateTest(config.multivariate_tests)
+        ob(t, df)
+      }).reduceOption(_ union _)
 
-      val multivariateResults = runMultivariateTests(session, schema, multivariateMetricTests)
+      results
+    })
 
-      val resultSchema = StructType(
-        StructField("metricRunID", StringType, nullable = true) ::
-          StructField("metricName", StringType, nullable = true) ::
-          StructField("jsonResults", StringType, nullable = true) ::
-          Nil)
-
-      val dfResultsUnivariate = session.createDataFrame(univariateResults, resultSchema)
-      val dfResultsMultivariate = session.createDataFrame(multivariateResults, resultSchema)
-
-      val dfResults = dfResultsUnivariate.unionAll(dfResultsMultivariate)
-
-      val metricsTable = config.metric_table.getOrElse("")
-      if(  metricsTable != "") {
-        saveMetricsToSnowflake(metricsTable, dfResults)
-      } else {
-        dfResults.collect().foreach(println)
+    metrics.foreach( r => {
+      /**
+       * If metric_table_prefix is set, save all metrics to individual tables in snowflake
+       */
+      config.metric_table_prefix match {
+        case Some(prefix) =>
+          val tn = TableName(prefix+r.tableSuffix)
+          appendToSnowflakeTable(tn, r.values)
+        case None => ;
       }
-    }
-    finally {
-      session.close()
-    }
+
+      /**
+       * If metric_csv_directory is set, save all metrics to individual files in the local directory
+       */
+      config.metric_csv_directory match {
+        case Some(path) =>
+          println(s"writing csv file for ${r.tableSuffix}")
+          val p = new File(path)
+          if (!p.exists) {
+            p.mkdir()
+          }
+          val f = new File(path+File.separator+r.tableSuffix)
+          if (f.exists) {
+            println(s"Output file ${f.getName} already exists! Quitting!")
+            sys.exit(1)
+          }
+          val buffer = new BufferedWriter(new FileWriter(f))
+          buffer.write(r.getCSVHeader)
+          r.getCSVData.foreach(buffer.write)
+          buffer.close()
+        case None => ;
+      }
+
+      /**
+       * If metric_dump_table is set, append all metrics to unified table
+       */
+      config.metric_dump_table match {
+        case Some(table) =>
+          appendToSnowflakeTable(TableName(table), r.getUnifiedDF)
+        case None => ;
+      }
+
+      println("finished actions")
+    })
+
+    println("closing session")
+    session.close()
   }
-
-  /***
-   * Saves the generated metrics to the provided metrics table in Snowflake
-   * @param tableName name of the table to save the metrics in
-   * @param df dataframe of generated metrics
-   */
-  def saveMetricsToSnowflake(tableName: String, df: DataFrame): Unit = {
-    df.write.mode(SaveMode.Overwrite).saveAsTable(tableName)
-  }
-
-  /***
-   * Will run all of the multiivariate tests against all of the columns in all of the tables on the schema.
-   * @param session active session to snowflake.
-   * @param schema Schema to get all tables from.
-   * @param multivariateMetricTests Tests to run against the columns
-   * @return
-   */
-  def runMultivariateTests(session: Session, schema: String, multivariateMetricTests: Seq[MultivariateMetric]): Seq[Row] = {
-    val dfTables = session.table("INFORMATION_SCHEMA.TABLES")
-      .filter(col("TABLE_SCHEMA") === schema && col("TABLE_TYPE") === "BASE TABLE")
-      .select(col("TABLE_NAME")).limit(2)
-
-    val tables = dfTables.collect().map(_.getString(0))
-
-    tables.flatMap(table => {
-
-      val columns = session.table("INFORMATION_SCHEMA.COLUMNS")
-        .filter(col("TABLE_SCHEMA") === schema && col("TABLE_NAME") === table)
-        .select(col("COLUMN_NAME")).collect().map(_.getString(0))
-
-      val tableData = session.table(table)
-
-        multivariateMetricTests.map(test => {
-          val testResultRaw = test.runMetric("test", columns.toList, tableData, table)
-          Row(testResultRaw.metricRunID, testResultRaw.metricName, testResultRaw.jsonResults)
-        })
-    }).toSeq
-  }
-
-  /***
-   * Will run all of the univariate tests against all of the columns in all of the tables on the schema.
-   * @param session active session to snowflake.
-   * @param schema Schema to get all tables from.
-   * @param univariateMetricTests Tests to run against the columns
-   * @return
-   */
-  def runUnivariateTests(session: Session, schema: String, univariateMetricTests: Seq[UnivariateMetric]): Seq[Row] = {
-    val dfTables = session.table("INFORMATION_SCHEMA.TABLES")
-      .filter(col("TABLE_SCHEMA") === schema && col("TABLE_TYPE") === "BASE TABLE")
-      .select(col("TABLE_NAME")).limit(1)
-
-    val tables = dfTables.collect().map(_.getString(0))
-
-    tables.flatMap(table => {
-
-      val columns = session.table("INFORMATION_SCHEMA.COLUMNS")
-        .filter(col("TABLE_SCHEMA") === schema && col("TABLE_NAME") === table)
-        .select(col("COLUMN_NAME")).collect().map(_.getString(0))
-
-      val tableData = session.table(table)
-
-      columns.flatMap(tableColumn => {
-        univariateMetricTests.map(test => {
-          val testResultRaw = test.runMetric("test", tableColumn, tableData)
-          Row(testResultRaw.metricRunID, testResultRaw.metricName, testResultRaw.jsonResults)
-        })
-      })
-    }).toSeq
-  }
-
-  /***
-   * Will get the metrics tests based on the string class passed in.
-   * @param tests
-   * @return
-   */
-  def generateUnivariateTest(tests: Seq[String]): Seq[UnivariateMetric] = {
-    tests.toArray.map(x => {
-      Class.forName("io.phdata.snowpark.metrics." + x).getDeclaredConstructor().newInstance().asInstanceOf[UnivariateMetric]
-    }).toSeq
-  }
-
-  /***
-   * Will get the metrics tests based on the string class passed in.
-   * @param tests
-   * @return
-   */
-  def generateMultivariateTest(tests: Seq[String]): Seq[MultivariateMetric] = {
-    tests.toArray.map(x => {
-      Class.forName("io.phdata.snowpark.metrics." + x).getDeclaredConstructor().newInstance().asInstanceOf[MultivariateMetric]
-    }).toSeq
-  }
-
-
 }

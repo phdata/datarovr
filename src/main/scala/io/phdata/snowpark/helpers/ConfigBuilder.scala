@@ -52,7 +52,7 @@ object ConfigBuilder {
               val tf = mc.reflectField(ft)
 
               tf.get.asInstanceOf[Option[String]]
-            }).find(_.nonEmpty).getOrElse(None)
+            }).find(_.nonEmpty).flatten
           })
         case "Seq[String]" =>
           f.set({
@@ -216,6 +216,8 @@ object ConfigBuilder {
           }
         case "Seq[String]" =>
           map.get(name) match {
+            case Some(v) if v == "" =>
+              f.set(Seq.empty[String])
             case Some(v) =>
               f.set(v.split(',').toSeq)
             case None => ;
