@@ -38,7 +38,7 @@ case class Config(
 
   snowflake_private_key_file: Option[String] = None,
   snowflake_private_key_file_pwd: Option[String] = None,
-  snowflake_private_key: Option[String] = None,
+  snowflake_privatekey: Option[String] = None,
 
   config_file: Option[String] = None,
   schema: Option[String] = None,
@@ -58,7 +58,7 @@ case class Config(
 
   def describe_snowflake_private_key_file: Option[String] = Some("Path to your private key file")
   def describe_snowflake_private_key_file_pwd: Option[String] = Some("Password to your encrypted private key file")
-  def describe_snowflake_private_key: Option[String] = None
+  def describe_snowflake_privatekey: Option[String] = None
 
   def describe_config_file: Option[String] = Some("Path to configuration file")
   def describe_schema: Option[String] = Some("Schema to get tables from")
