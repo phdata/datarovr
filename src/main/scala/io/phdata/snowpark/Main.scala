@@ -72,8 +72,7 @@ object Main {
             sys.exit(1)
           }
           val buffer = new BufferedWriter(new FileWriter(f))
-          buffer.write(r.getCSVHeader)
-          r.getCSVData.foreach(buffer.write)
+          r.getCSV.foreach(buffer.write)
           buffer.close()
         case None => ;
       }

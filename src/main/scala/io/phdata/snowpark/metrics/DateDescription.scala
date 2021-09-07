@@ -8,7 +8,7 @@ import io.phdata.snowpark.helpers.TableName
 class DateDescription(df: DataFrame) extends Metric {
   //TODO: validate columns of dataframe
   override val values: DataFrame = df
-  override val tableSuffix: String = "date_description_metric"
+  override val tableSuffix: String = "date_description"
 }
 
 object DateDescription extends MetricObject {

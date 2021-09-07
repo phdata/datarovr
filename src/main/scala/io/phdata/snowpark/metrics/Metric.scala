@@ -4,7 +4,7 @@ import com.snowflake.snowpark.DataFrame
 import com.snowflake.snowpark.functions._
 
 trait Metric {
-  val commonColumns = Seq("database", "schema", "table", "column", "timestamp")
+  val commonColumns = Seq("DATABASE", "SCHEMA", "TABLE", "COLUMN", "TIMESTAMP")
   def values: DataFrame
   def tableSuffix: String
 
@@ -17,19 +17,20 @@ trait Metric {
       .asInstanceOf[T]
   }
 
-  def getCSVHeader: String = {
-    values.schema.fields.map(_.name).mkString("", ",", "\n")
-  }
-
-  def getCSVData: Seq[String] = {
-    values.collect().map(r => r.toSeq.mkString("", ",", "\n"))
+  def getCSV: Seq[String] = {
+    val header = values.schema.fields.map(_.name).mkString("", ",", "\n")
+    Seq(header) ++ values.collect().map(_.toSeq.mkString("", ",", "\n"))
   }
 
   def getUnifiedDF: DataFrame = {
     values.select(
-      Seq(lit(this.getClass.getName)) ++
+      Seq(lit(this.getClass.getName.split('.').last).as("metric")) ++
       commonColumns.map(col) ++
-      Seq(to_json(object_construct(localColumns.map(col):_*)).as("values"))
+      Seq(to_json(
+          object_construct(
+            localColumns.flatMap(c => Seq(lit(c), col(c))):_*
+          )
+      ).as("values"))
     )
   }
 }

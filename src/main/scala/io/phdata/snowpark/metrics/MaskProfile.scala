@@ -7,7 +7,7 @@ import io.phdata.snowpark.helpers.TableName
 class MaskProfile(df: DataFrame) extends Metric {
   //TODO: validate columns of dataframe
   override val values: DataFrame = df
-  override val tableSuffix: String = "mask_profile_metric"
+  override val tableSuffix: String = "mask_profile"
 }
 
 object MaskProfile extends MetricObject {

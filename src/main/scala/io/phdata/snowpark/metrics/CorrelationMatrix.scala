@@ -2,13 +2,14 @@ package io.phdata.snowpark.metrics
 
 import com.snowflake.snowpark.DataFrame
 import com.snowflake.snowpark.functions.{col, corr, current_timestamp, lit}
+import com.snowflake.snowpark.types.DataTypes
 import io.phdata.snowpark.algorithms.{Accumulator, NonRepeatingCombPull, PermComb}
 import io.phdata.snowpark.helpers.TableName
 
 class CorrelationMatrix(df: DataFrame) extends Metric {
   //TODO: validate columns of dataframe
   override val values: DataFrame = df
-  override val tableSuffix: String = "correlation_matrix_metric"
+  override val tableSuffix: String = "correlation_matrix"
 }
 
 object CorrelationMatrix extends MetricObject {
@@ -24,7 +25,7 @@ object CorrelationMatrix extends MetricObject {
     val correlations = table.na.drop(0, numeric_cols)
       .agg(
         col_combinations.map(x => {
-          corr(col(x.head), col(x.last)).as(x.mkString("::"))
+          corr(col(x.head).cast(DataTypes.DoubleType), col(x.last).cast(DataTypes.DoubleType)).as(x.mkString("::"))
         })
       )
 

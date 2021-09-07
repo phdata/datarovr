@@ -1,14 +1,14 @@
 package io.phdata.snowpark.metrics
 import com.snowflake.snowpark.DataFrame
-import com.snowflake.snowpark.functions.{approx_percentile, array_agg, col, count, current_timestamp, kurtosis, lit, max, mean, min, skew, stddev, sum, udf, variance, when}
-import com.snowflake.snowpark.types.DataTypes
+import com.snowflake.snowpark.functions._
+import com.snowflake.snowpark.types.{DataTypes}
 import io.phdata.snowpark.algorithms.ShannonEntropy
 import io.phdata.snowpark.helpers.TableName
 
 class NumberDescription(df: DataFrame) extends Metric {
   //TODO: validate columns of dataframe
   override val values: DataFrame = df
-  override val tableSuffix: String = "number_description_metric"
+  override val tableSuffix: String = "number_description"
 }
 
 object NumberDescription extends MetricObject {
@@ -27,8 +27,10 @@ object NumberDescription extends MetricObject {
         max(dc).as("max"),
         min(dc).as("min"),
         variance(dc).as("variance"),
-        kurtosis(dc).as("kurtosis"),
-        skew(dc).as("skewness"),
+        when(count(dc) === count_distinct(dc), kurtosis(dc))
+          .otherwise(lit(null).cast(DataTypes.DoubleType)).as("kurtosis"),
+        when(count(dc) === count_distinct(dc), skew(dc))
+          .otherwise(lit(null).cast(DataTypes.DoubleType)).as("skewness"),
         approx_percentile(dc, 0.25).as("percentile25"),
         approx_percentile(dc, 0.5).as("percentile50"),
         approx_percentile(dc, 0.75).as("percentile75"),
