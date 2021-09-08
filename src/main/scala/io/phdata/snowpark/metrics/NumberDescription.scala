@@ -1,8 +1,7 @@
 package io.phdata.snowpark.metrics
 import com.snowflake.snowpark.DataFrame
 import com.snowflake.snowpark.functions._
-import com.snowflake.snowpark.types.{DataTypes}
-import io.phdata.snowpark.algorithms.ShannonEntropy
+import com.snowflake.snowpark.types.DataTypes
 import io.phdata.snowpark.helpers.TableName
 
 class NumberDescription(df: DataFrame) extends Metric {
@@ -13,10 +12,6 @@ class NumberDescription(df: DataFrame) extends Metric {
 
 object NumberDescription extends MetricObject {
   def apply(tn: TableName, table: DataFrame): Option[NumberDescription] = {
-    val entropyUdf = udf((values: Array[String]) => {
-      ShannonEntropy.entropy(values.map(_.toDouble.ceil))
-    })
-
     val numeric_cols = table.schema.fields.filter(isNumeric).map(_.name)
 
     val values = numeric_cols.map(columnName => {
@@ -39,16 +34,14 @@ object NumberDescription extends MetricObject {
           .otherwise(lit(null)).as("cv"),
         sum(dc).as("sum"),
         count(dc).as("count"),
-        entropyUdf(array_agg(dc)).as("entropy"),
+      ).select(
+        lit(tn.database).as("database"),
+        lit(tn.schema).as("schema"),
+        lit(tn.table).as("table"),
+        lit(columnName).as("column"),
+        current_timestamp().as("timestamp"),
+        col("*"),
       )
-        .select(
-          lit(tn.database).as("database"),
-          lit(tn.schema).as("schema"),
-          lit(tn.table).as("table"),
-          lit(columnName).as("column"),
-          current_timestamp().as("timestamp"),
-          col("*"),
-        )
     }).reduceOption(_ union _)
 
     values match {

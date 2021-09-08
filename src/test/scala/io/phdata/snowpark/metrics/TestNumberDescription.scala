@@ -23,7 +23,7 @@ class TestNumberDescription extends SessionConfigBase {
 
         val expected = Seq(
           Row("one", "two", "three", "NUMBER", 3.5355339059327378, 7.5, 10.0, 5.0, 12.5,
-            null, null, 7.5, 7.5, 12.5, 5.0, 0.4714045207910317, 15.0, 2, 1.0
+            null, null, 7.5, 7.5, 12.5, 5.0, 0.4714045207910317, 15.0, 2
           ),
         )
 

@@ -110,8 +110,9 @@ supported.
  * MaskProfile
  * DateDescription
  * CorrelationMatrix
+ * Entropy
 
-**System Default:** "NumberDescription,CorrelationMatrix,DateDescription,MaskProfile"
+**System Default:** "NumberDescription,CorrelationMatrix,DateDescription,MaskProfile,Entropy"
 
 #### log_level ####
 Use this to set the logging level of the snowpark client.
