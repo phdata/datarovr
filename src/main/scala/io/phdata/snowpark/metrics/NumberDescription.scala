@@ -27,9 +27,9 @@ object NumberDescription extends MetricObject {
         max(dc).as("max"),
         min(dc).as("min"),
         variance(dc).as("variance"),
-        when(count(dc) === count_distinct(dc), kurtosis(dc))
+        when(count(dc) <= count_distinct(dc)*2, kurtosis(dc))
           .otherwise(lit(null).cast(DataTypes.DoubleType)).as("kurtosis"),
-        when(count(dc) === count_distinct(dc), skew(dc))
+        when(count(dc) <= count_distinct(dc)*2, skew(dc))
           .otherwise(lit(null).cast(DataTypes.DoubleType)).as("skewness"),
         approx_percentile(dc, 0.25).as("percentile25"),
         approx_percentile(dc, 0.5).as("percentile50"),
