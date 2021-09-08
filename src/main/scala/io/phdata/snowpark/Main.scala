@@ -35,16 +35,16 @@ object Main {
       sys.exit(1)
     }
 
+    println("loading metrics")
     val metrics = config.metrics.map(companionFromString).flatMap(ob => {
-      val results = tables.flatMap(t => {
+      tables.flatMap(t => {
         val df = session.table(t.asMultipartName)
 
         ob(t, df)
       }).reduceOption(_ union _)
-
-      results
     })
 
+    println("calculating metrics")
     metrics.foreach( r => {
       /**
        * If metric_table_prefix is set, save all metrics to individual tables in snowflake
@@ -52,6 +52,7 @@ object Main {
       config.metric_table_prefix match {
         case Some(prefix) =>
           val tn = TableName(prefix+r.tableSuffix)
+          println(s"saving ${r.tableSuffix} to table $tn")
           appendToSnowflakeTable(tn, r.values)
         case None => ;
       }
@@ -82,11 +83,12 @@ object Main {
        */
       config.metric_dump_table match {
         case Some(table) =>
+          println(s"saving ${r.tableSuffix} to dump table $table")
           appendToSnowflakeTable(TableName(table), r.getUnifiedDF)
         case None => ;
       }
 
-      println("finished actions")
+      println(s"finished actions for ${r.tableSuffix}")
     })
 
     println("closing session")
