@@ -13,7 +13,7 @@ class DateDescription(df: DataFrame) extends Metric {
 
 object DateDescription extends MetricObject {
 
-  def apply(tn: TableName, table: DataFrame): Option[DateDescription] = {
+  override def apply(tn: TableName, table: DataFrame): Option[DateDescription] = {
     val date_cols = table.schema.fields.filter(isDate).map(_.name)
 
     val values = date_cols.map(columnName => {

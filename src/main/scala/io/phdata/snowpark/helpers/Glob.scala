@@ -1,7 +1,5 @@
 package io.phdata.snowpark.helpers
 
-import scala.util.matching.Regex
-
 /**
  * Takes a glob pattern and returns a standard regex.
  * Taken and ported from here:

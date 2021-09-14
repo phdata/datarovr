@@ -8,6 +8,9 @@ trait Metric {
   def values: DataFrame
   def tableSuffix: String
 
+  def getHTMLSnippet: String = "<h2>Not Implemented</h2>"
+
+  def name: String = this.getClass.getName.split('.').last
   def localColumns: Seq[String] = values.schema.map(_.name).filter(!commonColumns.contains(_))
 
   def union[T <: Metric](that: T): Metric = {
@@ -24,7 +27,7 @@ trait Metric {
 
   def getUnifiedDF: DataFrame = {
     values.select(
-      Seq(lit(this.getClass.getName.split('.').last).as("metric")) ++
+      Seq(lit(name).as("metric")) ++
       commonColumns.map(col) ++
       Seq(to_json(
           object_construct(

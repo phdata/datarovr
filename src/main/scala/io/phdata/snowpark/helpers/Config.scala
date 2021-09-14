@@ -46,6 +46,7 @@ case class Config(
   metric_csv_directory: Option[String] = None,
   metrics: Seq[String] = Seq[String](),
   log_level: Option[String] = None,
+  html_report: Option[String] = None,
 ) {
 
   /**
@@ -72,6 +73,7 @@ case class Config(
   def describe_metric_csv_directory: Option[String] = Some("Set this to the directory name to create CSV files in")
   def describe_metrics: Option[String] = Some("Comma separated list of metrics to run")
   def describe_log_level: Option[String] = Some("Set log level")
+  def describe_html_report: Option[String] = Some("Set this to the file name of the html output report")
 
   /**
    * Creates a Map[String,String] that can be passed directly to snowpark's session builder

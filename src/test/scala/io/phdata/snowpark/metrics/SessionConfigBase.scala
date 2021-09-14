@@ -2,7 +2,6 @@ package io.phdata.snowpark.metrics
 
 import com.snowflake.snowpark.Session
 import io.phdata.snowpark.helpers.{Config, ConfigBuilder}
-import io.phdata.snowpark.metrics.SessionConfigBase.session
 import org.junit.AfterClass
 import org.junit.BeforeClass
 
@@ -25,5 +24,6 @@ object SessionConfigBase {
 }
 
 class SessionConfigBase {
-  protected def getSession: Session = session.get
+  protected def getSession: Session = SessionConfigBase.session.get
+  protected def getConfig: Config = SessionConfigBase.config.get
 }

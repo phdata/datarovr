@@ -59,3 +59,6 @@ dependency-reduced-pom.xml
 
 #csv dir
 dr-csv
+
+#report file
+report.html

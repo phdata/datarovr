@@ -13,7 +13,7 @@ class CorrelationMatrix(df: DataFrame) extends Metric {
 }
 
 object CorrelationMatrix extends MetricObject {
-  def apply(tn: TableName, table: DataFrame): Option[CorrelationMatrix] = {
+  override def apply(tn: TableName, table: DataFrame): Option[CorrelationMatrix] = {
     val numeric_cols = table.schema.fields.filter(isNumeric).map(_.name)
 
     val accumulator = new Accumulator[String]

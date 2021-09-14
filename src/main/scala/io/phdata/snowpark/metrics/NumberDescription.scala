@@ -11,7 +11,7 @@ class NumberDescription(df: DataFrame) extends Metric {
 }
 
 object NumberDescription extends MetricObject {
-  def apply(tn: TableName, table: DataFrame): Option[NumberDescription] = {
+  override def apply(tn: TableName, table: DataFrame): Option[NumberDescription] = {
     val numeric_cols = table.schema.fields.filter(isNumeric).map(_.name)
 
     val values = numeric_cols.map(columnName => {

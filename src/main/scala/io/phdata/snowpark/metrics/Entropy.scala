@@ -7,12 +7,12 @@ import io.phdata.snowpark.helpers.TableName
 
 class Entropy(df: DataFrame) extends Metric {
   //TODO: Validate columns of the dataframe
-  val values: DataFrame = df
-  val tableSuffix: String = "entropy"
+  override val values: DataFrame = df
+  override val tableSuffix: String = "entropy"
 }
 
 object Entropy extends MetricObject {
-  def apply(tn: TableName, table: DataFrame): Option[Entropy] = {
+  override def apply(tn: TableName, table: DataFrame): Option[Entropy] = {
     val numeric_cols = table.schema.fields.filter(isNumeric).map(_.name)
     val ws = Window.partitionBy(col("group"))
 

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DataRovr by phData</title>
+  <script src="https://cdn.plot.ly/plotly-1.52.2.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
+  <style>
+    .metric {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    $(function() {
+      $("#current_metric").change(function() {
+        $(".metric").hide();
+        const metricDiv = "#"+$(this).val()
+        $(metricDiv).show();
+      });
+    });
+  </script>
+  <h1>DataRovr</h1>
+  <h4>by phData</h4>
+  <hr>
