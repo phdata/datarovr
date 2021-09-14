@@ -18,14 +18,14 @@ class TestMaskProfile extends SessionConfigBase {
       case Some(results) =>
         val actual = results.values
           .drop("timestamp")
-          .sort(col("column"))
+          .sort(col("column"), col("mask"))
           .collect()
           .toSeq
 
         val expected = Seq(
-          Row("one", "two", "three", "CHARACTER", "XXX", 2),
-          Row("one", "two", "three", "NUMBER", "NNN", 1),
-          Row("one", "two", "three", "NUMBER", "NNNN", 1),
+          Row("one", "two", "three", "CHARACTER", "XXX", 1.0),
+          Row("one", "two", "three", "NUMBER", "NNN", 0.5),
+          Row("one", "two", "three", "NUMBER", "NNNN", 0.5),
         )
 
         assertEquals(expected, actual)
@@ -37,7 +37,7 @@ class TestMaskProfile extends SessionConfigBase {
   @Test
   def testComplexReplacement(): Unit = {
 
-    val df = getSession.createDataFrame(Seq("125-266-1234", "215-266-9876", "five-five-five")).toDF("phone")
+    val df = getSession.createDataFrame(Seq("125-266-1234", "215-266-9876", "five-five-five", "four-four-four")).toDF("phone")
 
     val metric = MaskProfile(TableName("one", "two", "three"), df)
     metric match {
@@ -49,8 +49,8 @@ class TestMaskProfile extends SessionConfigBase {
           .toSeq
 
         val expected = Seq(
-          Row("one", "two", "three", "PHONE", "NNN-NNN-NNNN", 2),
-          Row("one", "two", "three", "PHONE", "XXXX-XXXX-XXXX", 1),
+          Row("one", "two", "three", "PHONE", "NNN-NNN-NNNN", 0.5),
+          Row("one", "two", "three", "PHONE", "XXXX-XXXX-XXXX", 0.5),
         )
 
         assertEquals(expected, actual)
@@ -83,7 +83,7 @@ class TestMaskProfile extends SessionConfigBase {
           .toSeq
 
         val expected = Seq(
-          Row("one", "two", "three", "NUMBER", "NNN", 2),
+          Row("one", "two", "three", "NUMBER", "NNN", 1.0),
         )
 
         assertEquals(expected, actual)
@@ -107,8 +107,8 @@ class TestMaskProfile extends SessionConfigBase {
           .toSeq
 
         val expected = Seq(
-          Row("one", "two", "three", "NUMBER", "NNN", 2),
-          Row("one", "two", "three", "CHARACTER", "XXX", 1),
+          Row("one", "two", "three", "NUMBER", "NNN", 1.0),
+          Row("one", "two", "three", "CHARACTER", "XXX", 1.0),
         )
 
         assertEquals(expected, actual)
