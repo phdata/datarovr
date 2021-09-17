@@ -16,7 +16,7 @@ class MaskProfile(df: DataFrame) extends Metric {
   override val values: DataFrame = df
   override val tableSuffix: String = "mask_profile"
 
-  def latestValues: DataFrame = {
+  override def latestValues: DataFrame = {
     val first = builtin("first_value")
 
     val ws = Window.partitionBy(
@@ -138,8 +138,6 @@ class MaskProfile(df: DataFrame) extends Metric {
       |    });
       |    $$(".column_select").change(function() {
       |      const plotDiv = "#"+$$(this).attr('id').split('-').slice(0,-1).join("-")+"-"+$$(this).val();
-      |      console.log(plotDiv);
-      |      console.log($$(plotDiv));
       |      $$(".mask_profile").hide();
       |      $$(plotDiv).show();
       |    });

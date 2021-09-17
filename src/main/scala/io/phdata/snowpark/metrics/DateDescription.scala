@@ -1,7 +1,7 @@
 package io.phdata.snowpark.metrics
 
-import com.snowflake.snowpark.DataFrame
-import com.snowflake.snowpark.functions.{col, current_timestamp, datediff, lit, max, min}
+import com.snowflake.snowpark.{DataFrame, Window}
+import com.snowflake.snowpark.functions.{builtin, col, current_timestamp, datediff, lit, max, min}
 import com.snowflake.snowpark.types.DataTypes
 import io.phdata.snowpark.helpers.TableName
 
@@ -9,6 +9,29 @@ class DateDescription(df: DataFrame) extends Metric {
   //TODO: validate columns of dataframe
   override val values: DataFrame = df
   override val tableSuffix: String = "date_description"
+
+  override def latestValues: DataFrame = {
+    val first = builtin("first_value")
+
+    val ws = Window.partitionBy(
+      col("database"),
+      col("schema"),
+      col("table"),
+      col("column"),
+    ).orderBy(col("timestamp").desc)
+
+    values
+      .select(
+        first(col("database")).over(ws).as("database"),
+        first(col("schema")).over(ws).as("schema"),
+        first(col("table")).over(ws).as("table"),
+        first(col("column")).over(ws).as("column"),
+        first(col("timestamp")).over(ws).as("timestamp"),
+        first(col("date_max")).over(ws).as("date_max"),
+        first(col("date_min")).over(ws).as("date_min"),
+        first(col("date_range")).over(ws).as("date_range"),
+      )
+  }
 }
 
 object DateDescription extends MetricObject {

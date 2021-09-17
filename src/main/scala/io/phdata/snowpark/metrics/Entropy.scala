@@ -9,6 +9,27 @@ class Entropy(df: DataFrame) extends Metric {
   //TODO: Validate columns of the dataframe
   override val values: DataFrame = df
   override val tableSuffix: String = "entropy"
+
+  override def latestValues: DataFrame = {
+    val first = builtin("first_value")
+
+    val ws = Window.partitionBy(
+      col("database"),
+      col("schema"),
+      col("table"),
+      col("column"),
+    ).orderBy(col("timestamp").desc)
+
+    values
+      .select(
+        first(col("database")).over(ws).as("database"),
+        first(col("schema")).over(ws).as("schema"),
+        first(col("table")).over(ws).as("table"),
+        first(col("column")).over(ws).as("column"),
+        first(col("timestamp")).over(ws).as("timestamp"),
+        first(col("entropy")).over(ws).as("entropy"),
+      )
+  }
 }
 
 object Entropy extends MetricObject {

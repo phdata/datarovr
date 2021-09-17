@@ -7,6 +7,7 @@ trait Metric {
   val commonColumns = Seq("DATABASE", "SCHEMA", "TABLE", "COLUMN", "TIMESTAMP")
   def values: DataFrame
   def tableSuffix: String
+  def latestValues: DataFrame
 
   def getHTMLSnippet: String = "<h2>Not Implemented</h2>"
 
