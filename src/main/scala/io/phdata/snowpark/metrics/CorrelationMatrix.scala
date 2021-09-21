@@ -49,6 +49,7 @@ class CorrelationMatrix(df: DataFrame) extends Metric {
     val nl = System.lineSeparator()
 
     val groups = latestValues
+      .filter(col("correlation").is_not_null)
       .collect()
       .toSeq
       .map(r => {

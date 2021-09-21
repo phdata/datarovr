@@ -2,17 +2,14 @@ package io.phdata.snowpark.helpers
 
 import io.phdata.snowpark.helpers.functions.writeReport
 import io.phdata.snowpark.metrics.{CorrelationMatrix, MaskProfile, Metric, SessionConfigBase}
-import org.junit.Test
+import org.junit.{Ignore, Test}
 
 import java.io.File
 
 class TestFunctions extends SessionConfigBase {
 
-  /**
-   * The commented tests are not production tests, just for development
-   * Please only uncomment for local development
-   */
-
+  //Test ignored because it's just for local development
+  @Ignore
   @Test
   def TestReport(): Unit = {
     val mp = new MaskProfile(getSession.table("datarovr.mask_profile"))

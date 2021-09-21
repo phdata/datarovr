@@ -78,11 +78,10 @@ class MaskProfile(df: DataFrame) extends Metric {
           .withOrientation(Orientation.Horizontal)
 
         val yaxis = Axis()
-          .withTitle("Mask")
           .withAutomargin(true)
 
         val xaxis = Axis()
-          .withTitle("Percent")
+          .withTitle("Percent of Total")
           .withAutomargin(true)
 
         val lo = Layout()
