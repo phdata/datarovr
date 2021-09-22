@@ -33,28 +33,36 @@ Most of those options can also be passed via the command line if you prefer.
 After the connection parameters, the most important parameters are as follows
 (you can read more about each option in the "Configure it" section):
 
-**Select Options**
+### Select Options ###
 `--metrics` Select which metrics to run. (default: all metrics)
 `--tables` Select which tables to profile. (default: "*")
 
-**Action Options**
+### Action Options ###
 At least one of these options is required for the software to actually do anything.
 
 `--report_html` Name of the html file to write visualizations to.
+
 Populating this option will result in the reports file being generated.
 
+
 `--metric_table_prefix` Prefix for the metric table names.
+
 Populating this will result in the data for each metric being appended to tables
 named with this as a prefix, and the metric's "table name" as a suffix.
 
+
 `--metric_dump_table` Name of the metric dump table.
+
 Populating this will result in all metrics being normalized into the same set of columns
 and that data being appended to this table.
 
+
 `--metric_csv_directory` Name of the directory to store metric data locally.
+
 Populating this will create a directory by the passed name (if it doesn't exist)
 and then store a csv file for each metric selected. The program will refuse to
 overwrite existing files.
+
 
 For a concrete working example:
 
