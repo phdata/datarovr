@@ -35,6 +35,7 @@ After the connection parameters, the most important parameters are as follows
 
 ### Select Options ###
 `--metrics` Select which metrics to run. (default: all metrics)
+
 `--tables` Select which tables to profile. (default: "*")
 
 ### Action Options ###
