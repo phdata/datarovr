@@ -33,7 +33,7 @@ Most of those options can also be passed via the command line if you prefer.
 After the connection parameters, the most important parameters are as follows
 (you can read more about each option in the "Configure it" section):
 
-### Select Options ###
+### Selection Options ###
 `--metrics` Select which metrics to run. (default: all metrics)
 
 `--tables` Select which tables to profile. (default: "*")
