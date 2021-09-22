@@ -36,7 +36,14 @@ After the connection parameters, the most important parameters are as follows
 ### Selection Options ###
 `--metrics` Select which metrics to run. (default: all metrics)
 
+Available metrics are listed below.
+
 `--tables` Select which tables to profile. (default: "*")
+
+You can use glob patterns to match set of databases, schemas, and tables that
+you would like to profile. Use `.` to qualify the components of the name. Missing
+components will be treated as relative to the connection parameters for database
+and schema.
 
 ### Action Options ###
 At least one of these options is required for the software to actually do anything.
@@ -143,13 +150,16 @@ This is the path to a configuration file from which to parse these options.
 #### tables ####
 Pass a glob triplet to this parameter to match any number of tables your 
 `snowflake_user` has access to. For example, you can pass `*.*.*` to match
-all tables. Pass `dev.accounting.*` to match all tables in the `"DEV"."ACCOUNTING"` schema.
+all tables. Pass `dev.accounting.*` to match all tables in the `"DEV"` database and
+`"ACCOUNTING"` schema.
 Pass `"dev"."acc*".tbl_?` to match `"dev"."accounting"."TBL_A"` and 
 `"dev"."accessibility"."TBL_1"`. A missing database or database *and* schema will default
 with the related snowflake parameters to provide relative scoping of tables. You get the idea.
 You can escape glob characters with `\` to match literal special characters in table names.
 
 **System Default:** "*"
+
+Which matches all tables in the connection database and schema.
 
 #### metric_table_prefix ####
 Populate this parameter to append metrics to individual tables named with this as a prefix. 
