@@ -1,7 +1,7 @@
 # DataRovr #
 
 ## Build it ##
-1. `git clone git@bitbucket.org:phdata/datarovr.git`
+1. `git clone git@github.com:phdata/datarovr.git`
 2. `cd datarovr`
 3. `vim env.sh` (see note below)
 4. `source env.sh`
